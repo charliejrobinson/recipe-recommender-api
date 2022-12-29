@@ -25,7 +25,12 @@ def get_all_recipes():
         recipe['id'] = doc.id
         recipes['recipes'].append(recipe)
 
-    return recipes
+    return make_response(
+        {
+            'recipes': recipes
+        },
+        200
+    )
 
 
 @app.route('/recipe/<recipe_id>', methods=['DELETE'])
@@ -34,14 +39,19 @@ def delete_recipe(recipe_id):
     try:
         doc_ref = db.collection('recipe').document(recipe_id)
         doc_ref.delete()
-        return make_response(
-            f'Recipe {recipe_id} deleted',
-            200
-        )
     except:
         return make_response(
-            f'Recipe not deleted, Recipe {recipe_id} not found',
+            {
+                'message': f'Recipe not deleted, Recipe {recipe_id} not found'
+            },
             404
+        )
+    
+    return make_response(
+            {
+                'message': f'Recipe {recipe_id} deleted'
+            },
+            200
         )
     
 
@@ -53,14 +63,21 @@ def get_recipe(recipe_id):
         doc = doc_ref.get()
     except:
         return make_response(
-            'Recipe not found',
+            {
+                'message': 'Recipe not found'
+            },
             404
         )
 
     recipe = doc.to_dict()
     recipe['id'] = doc.id
     
-    return recipe
+    return make_response(
+        {
+            'recipe': recipe
+        },
+        200
+    )
 
 @app.route('/recipe', methods=['PUT'])
 def put_recipe():
@@ -70,9 +87,11 @@ def put_recipe():
 
     if not valid_request:
         return make_response(
-        'Invalid request',
-        501)
-
+        {
+            'message': 'Invalid data format',
+            'errors': errors
+        },
+        400)
 
     doc_ref = db.collection('recipe').document()
     doc_ref.set({
@@ -82,9 +101,10 @@ def put_recipe():
     })
 
     return make_response(
-        'Recipe added',
+        {
+            'message': 'Recipe added'
+        },
         200)
 
-    
 
 app.run(host='0.0.0.0', port=81)
