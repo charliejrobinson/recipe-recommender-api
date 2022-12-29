@@ -79,6 +79,37 @@ def get_recipe(recipe_id):
         200
     )
 
+@app.route('/recipe/<recipe_id>', methods=['PUT'])
+def update_recipe(recipe_id):
+
+    try:
+        doc_ref = db.collection('recipe').document(recipe_id)
+    except:
+        return make_response(
+            {
+                'message': f'Recipe {recipe_id} not found'
+            },
+            404
+        )
+
+    body = request.get_json()
+
+    valid_request, _, errors = validate(body, rules=put_recipe_rules, return_info=True)
+
+    if not valid_request:
+        return make_response(
+        {
+            'message': 'Invalid data format',
+            'errors': errors
+        },
+        400)
+
+    doc_ref.set({
+        'name': body['name'],
+        'ingredients': body['ingredients'],
+        'instructions': body['instructions']
+    })
+
 @app.route('/recipe', methods=['PUT'])
 def put_recipe():
     body = request.get_json()
@@ -105,6 +136,5 @@ def put_recipe():
             'message': 'Recipe added'
         },
         200)
-
 
 app.run(host='0.0.0.0', port=81)
