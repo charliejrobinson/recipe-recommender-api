@@ -4,12 +4,12 @@ from pprint import pprint
 host_add = 'http://192.168.1.199:81'
 
 # Send PUT request to create new recipe
-def put_new_recipe(data):
-    r = requests.put(f'{host_add}/recipe', json=data)
+def create_new_recipe(data):
+    r = requests.put(f'{host_add}/recipes', json=data)
     print(r.json())
 
 # Send PUT request to update recipe
-def put_update_recipe(id, data):
+def update_recipe(id, data):
     r = requests.put(f'{host_add}/recipe/{id}', json=data)
     print(r.json())
 
@@ -21,6 +21,11 @@ def get_recipe(id):
 # Send DELETE request to delete a recipe from id
 def delete_recipe(id):
     r = requests.delete(f'{host_add}/recipe/{id}')
+    print(r.json())
+
+# Send GET request to get all recipes
+def get_all_recipes():
+    r = requests.get(f'{host_add}/recipes')
     print(r.json())
 
 # validate data
@@ -36,4 +41,4 @@ data = {
     'instructions': 'Put in oven'
 }
 
-get_recipe('tNk7IB6gwrm9WcPzzYat')
+get_all_recipes()
