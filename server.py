@@ -1,11 +1,12 @@
 from flask import Flask, request
 import firebase_admin
 from firebase_admin import firestore
+from validator import validate
 
 # Ingredients I have in the fridge
 # What can I make?
 
-# Application Default credentials are automatically created.
+# Application Default credentials are automatically created
 app = firebase_admin.initialize_app()
 db = firestore.client()
 
@@ -26,20 +27,29 @@ def get_all_recipes():
         recipe = doc.to_dict()
         recipe['id'] = doc.id
         recipes['recipes'].append(recipe)
+
     return recipes
 
 
 @app.route('/recipe/<recipe_id>', methods=['DELETE'])
 def delete_recipe(recipe_id):
-    doc_ref = db.collection('recipe').document(recipe_id)
-    doc_ref.delete()
+
+    try:
+        doc_ref = db.collection('recipe').document(recipe_id)
+        doc_ref.delete()
+        return {'message': f'Recipe  {recipe_id} deleted'}
+    except:
+        return {'message': '404: Recipe not found'}
     
-    return {'message': 'Recipe deleted'}
 
 @app.route('/recipe/<recipe_id>', methods=['GET'])
 def get_recipe(recipe_id):
-    doc_ref = db.collection('recipe').document(recipe_id)
-    doc = doc_ref.get()
+
+    try:
+        doc_ref = db.collection('recipe').document(recipe_id)
+        doc = doc_ref.get()
+    except:
+        return {'message': '404: Recipe not found'}
     
     if doc.empty:
         return {'message': 'recipe not found'}
@@ -52,7 +62,6 @@ def get_recipe(recipe_id):
 @app.route('/recipe', methods=['PUT'])
 def put_recipe():
     body = request.get_json()
-    print(body)
 
     doc_ref = db.collection('recipe').document()
     doc_ref.set({
