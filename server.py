@@ -1,7 +1,7 @@
 from flask import Flask, request
 import firebase_admin
 from firebase_admin import firestore
-from validator import validate
+from validation_rules import *
 
 # Ingredients I have in the fridge
 # What can I make?
@@ -62,6 +62,12 @@ def get_recipe(recipe_id):
 @app.route('/recipe', methods=['PUT'])
 def put_recipe():
     body = request.get_json()
+
+    result, _, errors = validate(body, put_recipe_rules, return_info = True)
+
+    if not result:
+        return {'message': errors}
+
 
     doc_ref = db.collection('recipe').document()
     doc_ref.set({
