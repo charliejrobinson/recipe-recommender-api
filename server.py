@@ -1,10 +1,7 @@
-from flask import Flask, request
+from flask import Flask, request, make_response
 import firebase_admin
 from firebase_admin import firestore
 from validation_rules import *
-
-# Ingredients I have in the fridge
-# What can I make?
 
 # Application Default credentials are automatically created
 app = firebase_admin.initialize_app()
@@ -37,9 +34,15 @@ def delete_recipe(recipe_id):
     try:
         doc_ref = db.collection('recipe').document(recipe_id)
         doc_ref.delete()
-        return {'message': f'Recipe  {recipe_id} deleted'}
+        return make_response(
+            f'Recipe {recipe_id} deleted',
+            200
+        )
     except:
-        return {'message': '404: Recipe not found'}
+        return make_response(
+            f'Recipe not deleted, Recipe {recipe_id} not found',
+            404
+        )
     
 
 @app.route('/recipe/<recipe_id>', methods=['GET'])
@@ -49,10 +52,10 @@ def get_recipe(recipe_id):
         doc_ref = db.collection('recipe').document(recipe_id)
         doc = doc_ref.get()
     except:
-        return {'message': '404: Recipe not found'}
-    
-    if doc.empty:
-        return {'message': 'recipe not found'}
+        return make_response(
+            'Recipe not found',
+            404
+        )
 
     recipe = doc.to_dict()
     recipe['id'] = doc.id
@@ -63,10 +66,12 @@ def get_recipe(recipe_id):
 def put_recipe():
     body = request.get_json()
 
-    result, _, errors = validate(body, put_recipe_rules, return_info = True)
+    valid_request, _, errors = validate(body, rules=put_recipe_rules, return_info=True)
 
-    if not result:
-        return {'message': errors}
+    if not valid_request:
+        return make_response(
+        'Invalid request',
+        501)
 
 
     doc_ref = db.collection('recipe').document()
@@ -76,6 +81,10 @@ def put_recipe():
         'instructions': body['instructions']
     })
 
-    return body
+    return make_response(
+        'Recipe added',
+        200)
+
+    
 
 app.run(host='0.0.0.0', port=81)
