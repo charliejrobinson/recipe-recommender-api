@@ -1,6 +1,8 @@
 from flask import Flask, request, make_response
 import firebase_admin
 from firebase_admin import firestore
+
+from validator import validate
 from validation_rules import *
 
 # Application Default credentials are automatically created
@@ -36,16 +38,8 @@ def get_all_recipes():
 @app.route('/recipe/<recipe_id>', methods=['DELETE'])
 def delete_recipe(recipe_id):
 
-    try:
-        doc_ref = db.collection('recipe').document(recipe_id)
-        doc_ref.delete()
-    except:
-        return make_response(
-            {
-                'message': f'Recipe not deleted, Recipe {recipe_id} not found'
-            },
-            404
-        )
+    doc_ref = db.collection('recipe').document(recipe_id)
+    doc_ref.delete()
     
     return make_response(
             {
@@ -109,6 +103,13 @@ def update_recipe(recipe_id):
         'ingredients': body['ingredients'],
         'instructions': body['instructions']
     })
+
+    return make_response(
+        {
+            'message': 'Recipe updated'
+        },
+        200
+    )
 
 @app.route('/recipe', methods=['PUT'])
 def put_recipe():
