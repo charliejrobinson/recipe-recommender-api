@@ -5,7 +5,7 @@ from firebase_admin import firestore
 from validator import validate
 from validation_rules import *
 
-# Application Default credentials are automatically created
+# Create Firebase app
 app = firebase_admin.initialize_app()
 db = firestore.client()
 
@@ -15,7 +15,7 @@ app = Flask(__name__)
 def index():
     return 'Web App with Python Flask!'
 
-
+# Return all recipes from database
 @app.route('/recipes', methods=['GET'])
 def get_all_recipes():
     docs = db.collection('recipe').stream()
@@ -34,7 +34,7 @@ def get_all_recipes():
         200
     )
 
-
+# Delete a recipe from id
 @app.route('/recipe/<recipe_id>', methods=['DELETE'])
 def delete_recipe(recipe_id):
 
@@ -48,7 +48,7 @@ def delete_recipe(recipe_id):
             200
         )
     
-
+# Return recipe info from id
 @app.route('/recipe/<recipe_id>', methods=['GET'])
 def get_recipe(recipe_id):
 
@@ -73,6 +73,7 @@ def get_recipe(recipe_id):
         200
     )
 
+# Update recipe from id
 @app.route('/recipe/<recipe_id>', methods=['PUT'])
 def update_recipe(recipe_id):
 
@@ -111,8 +112,9 @@ def update_recipe(recipe_id):
         200
     )
 
-@app.route('/recipe', methods=['PUT'])
-def put_recipe():
+# Create new recipe
+@app.route('/recipes', methods=['PUT'])
+def create_recipe():
     body = request.get_json()
 
     valid_request, _, errors = validate(body, rules=put_recipe_rules, return_info=True)
@@ -134,7 +136,7 @@ def put_recipe():
 
     return make_response(
         {
-            'message': 'Recipe added'
+            'message': f'Recipe added, id: {doc_ref}'
         },
         200)
 
