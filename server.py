@@ -140,4 +140,34 @@ def create_recipe():
         },
         200)
 
+@app.route('/recipes/search', methods=['GET'])
+def search():
+    name = request.args.get('name')
+
+    query = db.collection('recipe').where('name', '==', name).stream()
+
+    recipes = []
+
+    for doc in query:
+
+        recipe = doc.to_dict()
+        recipe['id'] = doc.id
+
+        recipes.append(recipe)
+
+    if not recipes:
+        return make_response(
+            {
+                'message': 'No recipes found'
+            },
+            404
+        )
+
+    return make_response(
+        {
+            'recipes': recipes
+        },
+        200
+    )
+
 app.run(host='0.0.0.0', port=81)
