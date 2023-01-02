@@ -33,15 +33,7 @@ def search_by_name(recipe_name):
     r = requests.get(f'{host_add}/recipes/search?name={recipe_name}')
     return r.json()
 
-# add query route
+
 # add comments & documentation
-# validate request : if object doesn't exist, return 404
-# vue / IFTT
-
-data = {
-    'name': 3,
-    'ingredients': ['radish','honey'],
-    'instructions': 'Put in oven'
-}
-
-search_by_name('validrecipe')
+# vue / IFTT -> hosting
+# add limit for query, pagination (flask?)
