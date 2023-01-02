@@ -43,11 +43,18 @@ def filter_recipes(recipes):
     
     return filtered_recipes
 
+# uploading duplicates?
+# what if invalid request?
 def upload_all_recipes(filtered_recipes):
 
     for recipe in filtered_recipes:
-        create_new_recipe(filtered_recipes[recipe])
-        break
+        r = create_new_recipe(filtered_recipes[recipe])
+        
+        # error handling for invalid upload request
+        if r.status_code == 400:
+            print(r.json()['message'] + ' recipe id: ' + recipe)
+            print('halting upload')
+            break
 
 recipes_data = read_recipe_file('recipes.json')
 filtered_recipes = filter_recipes(recipes_data)
