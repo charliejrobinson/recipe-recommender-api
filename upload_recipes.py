@@ -1,4 +1,4 @@
-from call_api import create_new_recipe
+from call_api import create_new_recipe, search_by_name
 import json
 
 ############################
@@ -44,18 +44,28 @@ def filter_recipes(recipes):
     return filtered_recipes
 
 # uploading duplicates?
-# what if invalid request?
-def upload_all_recipes(filtered_recipes):
+def upload_all_recipes(filtered_recipes, upload_duplicates=False):
 
     for recipe in filtered_recipes:
-        r = create_new_recipe(filtered_recipes[recipe])
+
+        if not upload_duplicates:
+            recipe_name = filtered_recipes[recipe]['name']
+
+            # checks for duplicate
+            name_alreaady_exists_request = search_by_name(recipe_name)
+
+            if name_alreaady_exists_request.status_code != 404:
+                print(f'Recipe with name {recipe_name} already exists. Recipe not uploaded due to upload_duplicates={upload_duplicates}')
+                continue
+
+        new_recipe_request = create_new_recipe(filtered_recipes[recipe])
         
         # error handling for invalid upload request
-        if r.status_code == 400:
-            print(r.json()['message'] + ' recipe id: ' + recipe)
+        if new_recipe_request.status_code == 400:
+            print(new_recipe_request.json()['message'] + ' recipe id: ' + recipe)
             print('halting upload')
             break
 
 recipes_data = read_recipe_file('recipes.json')
 filtered_recipes = filter_recipes(recipes_data)
-upload_all_recipes(filtered_recipes)
+upload_all_recipes(filtered_recipes, upload_duplicates=False)
